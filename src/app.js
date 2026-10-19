@@ -7,7 +7,13 @@ import { aiRouter } from './routes/ai.routes.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://ai-task-manager-frontend-dusky.vercel.app', 
+        'http://localhost:5173'  
+    ],
+    credentials: true
+}));
 
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
