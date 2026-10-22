@@ -13,6 +13,10 @@ const taskSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    userId: {
+      type: String,
+      required: [true, 'User ID header is required']
+    },
     status: {
       type: String,
       enum: {
@@ -36,4 +40,4 @@ taskSchema.index({ status: 1 });
 
 const Task = mongoose.model('Task', taskSchema);
 
-export {Task}
+export { Task }

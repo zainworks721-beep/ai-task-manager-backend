@@ -17,6 +17,7 @@ const getGroqClient = () => {
 const planTask = async (req, res, next) => {
   try {
     const { description } = req.body;
+    
 
    
     if (!description || typeof description !== 'string' || description.trim() === '') {

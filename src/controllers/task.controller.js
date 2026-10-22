@@ -1,10 +1,10 @@
-import mongoose from 'mongoose'
-import {Task} from '../models/task.model.js';
-
+import mongoose from 'mongoose';
+import { Task } from '../models/task.model.js';
 
 const createTask = async (req, res, next) => {
   try {
     const { title, description, status, dueDate } = req.body;
+    
 
     if (!title || typeof title !== 'string' || title.trim() === '') {
       return res.status(400).json({
@@ -15,6 +15,7 @@ const createTask = async (req, res, next) => {
 
     const taskData = {
       title: title.trim(),
+      userId: req.userId,
       ...(description !== undefined && { description: description.trim() }),
       ...(status !== undefined && { status }),
       ...(dueDate !== undefined && { dueDate: dueDate ? new Date(dueDate) : null }),
@@ -32,11 +33,11 @@ const createTask = async (req, res, next) => {
   }
 };
 
-
 const getAllTasks = async (req, res, next) => {
   try {
     const { status } = req.query;
-    const filter = {};
+    
+    const filter = { userId: req.userId };
 
     if (status) {
       const validStatuses = ['pending', 'in-progress', 'completed'];
@@ -72,7 +73,8 @@ const getTaskById = async (req, res, next) => {
       });
     }
 
-    const task = await Task.findById(id);
+  
+    const task = await Task.findOne({ _id: id, userId: req.userId });
 
     if (!task) {
       return res.status(404).json({
@@ -90,20 +92,18 @@ const getTaskById = async (req, res, next) => {
   }
 };
 
-
 const updateTask = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, description, status, dueDate } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongooseTypes.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
         message: `Invalid Task ID format: '${id}'`,
       });
     }
 
-   
     if (title !== undefined && (typeof title !== 'string' || title.trim() === '')) {
       return res.status(400).json({
         success: false,
@@ -117,8 +117,9 @@ const updateTask = async (req, res, next) => {
     if (status !== undefined) updates.status = status;
     if (dueDate !== undefined) updates.dueDate = dueDate ? new Date(dueDate) : null;
 
-    const updatedTask = await Task.findByIdAndUpdate(
-      id,
+ 
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: id, userId: req.userId },
       { $set: updates },
       { new: true, runValidators: true }
     );
@@ -151,7 +152,8 @@ const deleteTask = async (req, res, next) => {
       });
     }
 
-    const task = await Task.findByIdAndDelete(id);
+
+    const task = await Task.findOneAndDelete({ _id: id, userId: req.userId });
 
     if (!task) {
       return res.status(404).json({
